@@ -2,6 +2,7 @@
 namespace Eadanilenko\KinopoiskInfo;
 
 use Snoopy\Snoopy;
+
 class KinopoiskInfo{
 
     /**
@@ -14,17 +15,33 @@ class KinopoiskInfo{
      */
     private $memcached;
 
+    /**
+     * @var array with kinopoisk account info
+     */
     private $auth = array();
+
+    /**
+     * @var int Cache ttl
+     */
+    private $cacheTtl = 3600;
 
     const CLIENT_AGENT = "Mozilla/5.0 (Windows; U; Windows NT 6.1; uk; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13 Some plugins";
 
     const MEMECACHED_FILM_PREFIX = 'kinopoiks_info_film_';
 
-    public function __construct(\Memcached $memcached, $kinopoiskLogin=null, $kinopoiskPass=null)
+    /**
+     * KinopoiskInfo constructor.
+     * @param \Memcached $memcached
+     * @param int|null $cacheTtl
+     * @param string|null $kinopoiskLogin
+     * @param string|null $kinopoiskPass
+     */
+    public function __construct(\Memcached $memcached, $cacheTtl = null, $kinopoiskLogin=null, $kinopoiskPass=null)
     {
         $this->memcached = $memcached;
         $this->snoopy = new Snoopy();
         $this->snoopy->maxredirs = 2;
+        if($cacheTtl) $this->cacheTtl = $cacheTtl;
 
         if($kinopoiskLogin && $kinopoiskPass) $this->auth = array(
             'shop_user[login]' => $kinopoiskLogin,
@@ -36,12 +53,22 @@ class KinopoiskInfo{
         $this->snoopy->agent = self::CLIENT_AGENT;
     }
 
+    /**
+     * @param $id
+     * @return Movie
+     * @throws MovieNotFoundException
+     */
     private function parseFilmFromKinopoiskById($id){
         if(count($this->auth)>0){
             $this->snoopy->submit('http://www.kinopoisk.ru/level/30/', $this->auth);
             $this->snoopy->fetch('http://www.kinopoisk.ru/film/'.$id);
         }
 
+
+        if($this->snoopy->status==404) throw new MovieNotFoundException("Movie with id ".$id." not found");
+
+        $movie = new Movie();
+        $movie->id = (int)$id;
 
         $mainPage = $this->snoopy -> results;
         $mainPage = iconv('windows-1251' , 'utf-8', $mainPage);
@@ -190,27 +217,80 @@ class KinopoiskInfo{
         $new['trailer_url'] = $main_trailer_url[count($main_trailer_url)-1]['url'];
         $new['trailers'] = $all_trailers;
 
-        $json = json_encode(array(
-                'movie' => $new,
-            )
-        );
+        $movie->name          = $new['name'];
+        $movie->originalName  = $new['originalname'];
+        $movie->year          = (int)$new['year'];
+        $movie->countryTitle  = $new['country_title'];
+        $movie->slogan        = $new['slogan'];
+        $movie->rusCharges    = $new['rus_charges'];
+        $movie->worldPremiere = $new['world_premiere'];
+        $movie->rusPremiere   = $new['rus_premiere'];
+        $movie->duration      = $new['time'];
+        $movie->imdbRating    = $new['imdb'];
+        $movie->rating        = $new['kinopoisk'];
+        $movie->posterUrl     = $new['poster_url'];
+        $movie->trailerUrl    = $new['trailer_url'];
 
-        return $json;
+        foreach ($new['actors_main'] as $person){
+            array_push($movie->actors,new Person($person['id'], $person['name']));
+        }
+
+        foreach ($new['director'] as $person){
+            array_push($movie->director,new Person($person['id'], $person['name']));
+
+        }
+
+        foreach ($new['script'] as $person){
+            array_push($movie->script,new Person($person['id'], $person['name']));
+        }
+
+        foreach ($new['producer'] as $person){
+            array_push($movie->producer, new Person($person['id'], $person['name']));
+        }
+
+        foreach ($new['operator'] as $person){
+            array_push($movie->operator,new Person($person['id'], $person['name']));
+        }
+
+        foreach ($new['composer'] as $person){
+            array_push($movie->composer,new Person($person['id'], $person['name']));
+        }
+
+        foreach ($new['genre'] as $genre){
+            array_push($movie->genre, new Genre($genre['id'],$genre['title']));
+        }
+
+        foreach ($new['trailers'] as $item) {
+            $trailer = new Trailer();
+            $trailer->title = $item['title'];
+
+            foreach ($item['sd'] as $trailerItem){
+                array_push($trailer->sd, new TrailerItem($trailerItem['url'],$trailerItem['quality']));
+            }
+
+            foreach ($item['hd'] as $trailerItem){
+                array_push($trailer->hd, new TrailerItem($trailerItem['url'],$trailerItem['quality']));
+            }
+
+            array_push($movie->trailers,$trailer);
+        }
+
+        return $movie;
     }
     
     /**
      * @param $id int
      * @return  string
      */
-    public function getFilmMetaFromId($id){
+    public function getMovieFromId($id){
 
-        if($content = $this->memcached->get(self::MEMECACHED_FILM_PREFIX.$id)){
-            return $content;
+        if($movie = $this->memcached->get(self::MEMECACHED_FILM_PREFIX.$id)){
+            return $movie;
         }
-        $json = $this->parseFilmFromKinopoiskById($id);
-        $this->memcached->set(self::MEMECACHED_FILM_PREFIX.$id, $json, 3600);
-        return $json;
 
+        $movie = $this->parseFilmFromKinopoiskById($id);
+        $this->memcached->set(self::MEMECACHED_FILM_PREFIX.$id, $movie, $this->cacheTtl);
+        return $movie;
     }
 
     private function resultClear( $val, $key = '' ){

@@ -1,352 +1,317 @@
 Парсер кинопоиска, который помимо основной информации по фильму, выдаёт ещё и список трейлеров.
 
-Для локального кеша используется Memcached. parser_kinopoisk.php содержит пример использования
-Формат выдаваемой информации:
+Для локального кеша используется Memcached. example.php содержит пример использования
+
+Пример вывода:
+
 ```JSON
 {
-    "movie": {
-        "name": "Мачо и ботан 2",
-        "originalname": "22 Jump Street",
-        "year": "2014",
-        "country_title": "США",
-        "slogan": "«Копам под прикрытием крыша не нужна»",
-        "actors_main": [
+   "id":840885,
+   "name":"Большой и добрый великан",
+   "originalName":"The BFG",
+   "year":2016,
+   "countryTitle":"Великобритания, Канада, США",
+   "slogan":"«Если твой друг великан, тебя ждут великие дела»",
+   "actors":[
+      {
+         "id":52280,
+         "name":"Марк Райлэнс"
+      },
+      {
+         "id":3784739,
+         "name":"Руби Барнхилл"
+      },
+      {
+         "id":33566,
+         "name":"Пенелопа Уилтон"
+      },
+      {
+         "id":406864,
+         "name":"Джемейн Клемент"
+      },
+      {
+         "id":675391,
+         "name":"Ребекка Холл"
+      },
+      {
+         "id":223527,
+         "name":"Рейф Сполл"
+      },
+      {
+         "id":962568,
+         "name":"Билл Хейдер"
+      },
+      {
+         "id":19913,
+         "name":"Оулавюр Дарри Оулафссон"
+      },
+      {
+         "id":33497,
+         "name":"Адам Годли"
+      },
+      {
+         "id":554914,
+         "name":"Майкл Адамуэйт"
+      }
+   ],
+   "director":[
+      {
+         "id":22260,
+         "name":"Стивен Спилберг"
+      }
+   ],
+   "script":[
+      {
+         "id":80003,
+         "name":"Мелисса Мэтисон"
+      },
+      {
+         "id":84678,
+         "name":"Роальд Даль"
+      }
+   ],
+   "producer":[
+      {
+         "id":20396,
+         "name":"Кэтлин Кеннеди"
+      },
+      {
+         "id":1617211,
+         "name":"Кристи Макоско Кригер"
+      },
+      {
+         "id":50014,
+         "name":"Джон Мэдден"
+      }
+   ],
+   "operator":[
+      {
+         "id":9326,
+         "name":"Януш Камински"
+      }
+   ],
+   "composer":[
+      {
+         "id":225027,
+         "name":"Джон Уильямс"
+      }
+   ],
+   "genre":[
+      {
+         "id":5,
+         "name":"фэнтези"
+      },
+      {
+         "id":10,
+         "name":"приключения"
+      },
+      {
+         "id":11,
+         "name":"семейный"
+      }
+   ],
+   "rusCharges":"  1.34 млн",
+   "worldPremiere":"14 мая 2016",
+   "rusPremiere":"30 июня 2016",
+   "duration":"117 мин. / 01:57",
+   "imdbRating":"7.00 (5339)",
+   "rating":"6.187",
+   "posterUrl":"http://www.kinopoisk.ru/images/film_big/840885.jpg",
+   "trailerUrl":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-291415.mp4",
+   "trailers":[
+      {
+         "title":"Трейлер №3 (дублированный)",
+         "sd":[
             {
-                "name": "Джона Хилл",
-                "id": "581340"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-310611.mp4",
+               "quality":"Низкое качество"
             },
             {
-                "name": "Ченнинг Татум",
-                "id": "475804"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-310609.mp4",
+               "quality":"Среднее качество"
             },
             {
-                "name": "Петер Стормаре",
-                "id": "6237"
-            },
-            {
-                "name": "Уайатт Расселл",
-                "id": "63924"
-            },
-            {
-                "name": "Эмбер Стивенс",
-                "id": "37784"
-            },
-            {
-                "name": "Джиллиан Белл",
-                "id": "1723738"
-            },
-            {
-                "name": "Айс Кьюб",
-                "id": "6721"
-            },
-            {
-                "name": "братья Лукас",
-                "id": "2834381"
-            },
-            {
-                "name": "Ник Офферман",
-                "id": "9884"
-            },
-            {
-                "name": "Джимми Татро",
-                "id": "3146173"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-310605.mp4",
+               "quality":"Высокое качество"
             }
-        ],
-        "actors_voices": [
+         ],
+         "hd":[
             {
-                "name": "Роман Бурлаков",
-                "id": "1822267"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-310606.mp4",
+               "quality":"Низкое качество"
             },
             {
-                "name": "Андрей Кузнецов",
-                "id": "1615051"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-310607.mp4",
+               "quality":"Среднее качество"
             },
             {
-                "name": "Станислав Концевич",
-                "id": "277374"
-            },
-            {
-                "name": "Валерий Соловьев",
-                "id": "1079049"
-            },
-            {
-                "name": "Сергей Куприянов",
-                "id": "269691"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-310608.mp4",
+               "quality":"Высокое качество"
             }
-        ],
-        "director": [
+         ]
+      },
+      {
+         "title":"Трейлер №3",
+         "sd":[
             {
-                "name": "Фил Лорд",
-                "id": "1297700"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-309066.mp4",
+               "quality":"Среднее качество"
             },
             {
-                "name": "Кристофер Миллер",
-                "id": "30488"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-309065.mp4",
+               "quality":"Высокое качество"
             }
-        ],
-        "script": [
+         ],
+         "hd":[
             {
-                "name": "Майкл Бэколл",
-                "id": "9989"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-309069.mp4",
+               "quality":"Низкое качество"
             },
             {
-                "name": "Орен Узил",
-                "id": "1928749"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-309068.mp4",
+               "quality":"Среднее качество"
             },
             {
-                "name": "Родни Ротман",
-                "id": "1096334"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-309067.mp4",
+               "quality":"Высокое качество"
             }
-        ],
-        "producer": [
+         ]
+      },
+      {
+         "title":"Трейлер №2 (дублированный)",
+         "sd":[
             {
-                "name": "Джона Хилл",
-                "id": "581340"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-310595.mp4",
+               "quality":"Среднее качество"
             },
             {
-                "name": "Нил Х. Мориц",
-                "id": "52"
-            },
-            {
-                "name": "Ченнинг Татум",
-                "id": "475804"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-310596.mp4",
+               "quality":"Высокое качество"
             }
-        ],
-        "operator": [
+         ],
+         "hd":[
             {
-                "name": "Бэрри Петерсон",
-                "id": "611940"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-310597.mp4",
+               "quality":"Низкое качество"
+            },
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-310598.mp4",
+               "quality":"Среднее качество"
+            },
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-310599.mp4",
+               "quality":"Высокое качество"
             }
-        ],
-        "composer": [
+         ]
+      },
+      {
+         "title":"Трейлер №2",
+         "sd":[
             {
-                "name": "Марк Мазерсбо",
-                "id": "27000"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-304704.mp4",
+               "quality":"Среднее качество"
+            },
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-304703.mp4",
+               "quality":"Высокое качество"
             }
-        ],
-        "genre": [
+         ],
+         "hd":[
             {
-                "title": "комедия",
-                "id": "6"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-304702.mp4",
+               "quality":"Низкое качество"
             },
             {
-                "title": "боевик",
-                "id": "3"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-304706.mp4",
+               "quality":"Среднее качество"
             },
             {
-                "title": "криминал",
-                "id": "16"
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-304705.mp4",
+               "quality":"Высокое качество"
             }
-        ],
-        "rus_charges": "  1.48 млн",
-        "world_premiere": "5 июня 2014",
-        "rus_premiere": "3 июля 2014",
-        "time": "112 мин. / 01:52",
-        "description": "Офицерам Шмидту и Дженко теперь предстоит работать под прикрытием в местном колледже. Однако когда Дженко встречает родственную душу в футбольной команде, а Шмидт проникает в богемную среду, они начинают сомневаться в их товариществе",
-        "imdb": "7.30 (112 583)",
-        "kinopoisk": "6.826",
-        "poster_url": "http://www.kinopoisk.ru/images/film_big/672899.jpg",
-        "trailer_url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-192369.mp4",
-        "trailers": [
+         ]
+      },
+      {
+         "title":"Трейлер (украинский язык)",
+         "sd":[
             {
-                "title": "Трейлер №3",
-                "sd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-215247.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ],
-                "hd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-215249.mp4",
-                        "quality": "Среднее качество"
-                    }
-                ]
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-302740.mp4",
+               "quality":"Среднее качество"
             },
             {
-                "title": "Международный трейлер",
-                "sd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-210639.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ],
-                "hd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-210638.mp4",
-                        "quality": "Среднее качество"
-                    }
-                ]
-            },
-            {
-                "title": "Red-band трейлер №2 (украинский язык)",
-                "sd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-210128.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ],
-                "hd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-210129.mp4",
-                        "quality": "Среднее качество"
-                    }
-                ]
-            },
-            {
-                "title": "Red-band трейлер №2",
-                "sd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-206333.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ],
-                "hd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-206334.mp4",
-                        "quality": "Среднее качество"
-                    }
-                ]
-            },
-            {
-                "title": "Трейлер №2",
-                "sd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-199639.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ],
-                "hd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-199640.mp4",
-                        "quality": "Среднее качество"
-                    }
-                ]
-            },
-            {
-                "title": "Трейлер (украинский язык)",
-                "sd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-213121.mp4",
-                        "quality": "Среднее качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-213122.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ],
-                "hd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-213124.mp4",
-                        "quality": "Низкое качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-213126.mp4",
-                        "quality": "Среднее качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-213128.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ]
-            },
-            {
-                "title": "Трейлер (дублированный)",
-                "sd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-192372.mp4",
-                        "quality": "Среднее качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-192367.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ],
-                "hd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-192370.mp4",
-                        "quality": "Низкое качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-192368.mp4",
-                        "quality": "Среднее качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-192369.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ]
-            },
-            {
-                "title": "Red-band трейлер (русский язык)",
-                "sd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-192260.mp4",
-                        "quality": "Низкое качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-192238.mp4",
-                        "quality": "Среднее качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-192239.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ],
-                "hd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-192240.mp4",
-                        "quality": "Низкое качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-192241.mp4",
-                        "quality": "Среднее качество"
-                    }
-                ]
-            },
-            {
-                "title": "Трейлер",
-                "sd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-194186.mp4",
-                        "quality": "Среднее качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-194182.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ],
-                "hd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-194183.mp4",
-                        "quality": "Низкое качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-194184.mp4",
-                        "quality": "Среднее качество"
-                    },
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-194185.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ]
-            },
-            {
-                "title": "Red-band трейлер",
-                "sd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-191181.mp4",
-                        "quality": "Высокое качество"
-                    }
-                ],
-                "hd": [
-                    {
-                        "url": "http://kp.cdn.yandex.net/672899/kinopoisk.ru-22-Jump-Street-191182.mp4",
-                        "quality": "Среднее качество"
-                    }
-                ]
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-302741.mp4",
+               "quality":"Высокое качество"
             }
-        ]
-    }
+         ],
+         "hd":[
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-302742.mp4",
+               "quality":"Низкое качество"
+            },
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-302743.mp4",
+               "quality":"Среднее качество"
+            },
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-302744.mp4",
+               "quality":"Высокое качество"
+            }
+         ]
+      },
+      {
+         "title":"Трейлер (дублированный)",
+         "sd":[
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-291411.mp4",
+               "quality":"Среднее качество"
+            },
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-291412.mp4",
+               "quality":"Высокое качество"
+            }
+         ],
+         "hd":[
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-291413.mp4",
+               "quality":"Низкое качество"
+            },
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-291414.mp4",
+               "quality":"Среднее качество"
+            },
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-291415.mp4",
+               "quality":"Высокое качество"
+            }
+         ]
+      },
+      {
+         "title":"Трейлер",
+         "sd":[
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-304695.mp4",
+               "quality":"Среднее качество"
+            },
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-304694.mp4",
+               "quality":"Высокое качество"
+            }
+         ],
+         "hd":[
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-304693.mp4",
+               "quality":"Низкое качество"
+            },
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-304692.mp4",
+               "quality":"Среднее качество"
+            },
+            {
+               "url":"https://kp.cdn.yandex.net/840885/kinopoisk.ru-BFG_-The-304696.mp4",
+               "quality":"Высокое качество"
+            }
+         ]
+      }
+   ]
 }
 ```
