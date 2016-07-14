@@ -1,5 +1,5 @@
 {
-  "name":         "eadanilenko/parser-kinopoisk",
+  "name":         "eadanilenko/kinopoisk-info",
   "description":  "Parse kinopoisk.ru",
   "keywords":     ["parser", "kinopoisk"],
   "type":         "library",
