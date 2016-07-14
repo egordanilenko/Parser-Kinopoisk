@@ -36,28 +36,20 @@ class KinopoiskInfo{
         $this->snoopy->agent = self::CLIENT_AGENT;
     }
 
-    /**
-     * @param $id int
-     * @return  string
-     */
-    public function getFilmMetaFromId($id){
-
-        if($content = $this->memcached->get(self::MEMECACHED_FILM_PREFIX.$id)){
-            return $content;
-        }
+    private function parseFilmFromKinopoiskById($id){
         if(count($this->auth)>0){
             $this->snoopy->submit('http://www.kinopoisk.ru/level/30/', $this->auth);
             $this->snoopy->fetch('http://www.kinopoisk.ru/film/'.$id);
         }
 
 
-        $main_page = $this->snoopy -> results;
-        $main_page = iconv('windows-1251' , 'utf-8', $main_page);
+        $mainPage = $this->snoopy -> results;
+        $mainPage = iconv('windows-1251' , 'utf-8', $mainPage);
 
         // страница с трейлерами
         $this->snoopy -> fetch('http://www.kinopoisk.ru/film/' . $id . '/video/type/1/');
-        $trailers_page = $this->snoopy -> results;
-        $trailers_page = iconv('windows-1251' , 'utf-8', $trailers_page);
+        $trailersPage = $this->snoopy -> results;
+        $trailersPage = iconv('windows-1251' , 'utf-8', $trailersPage);
 
         $parse = array(
             'name' =>         '#<h1.*?class="moviename-big".*?>(.*?)</h1>#si',
@@ -96,7 +88,7 @@ class KinopoiskInfo{
         $new=array();
 
         foreach($parse as $index => $value){
-            if (preg_match($value,$main_page,$matches)) {
+            if (preg_match($value,$mainPage,$matches)) {
                 if (in_array($index, array('actors_voices','actors_main'))) { // здесь нужен дополнительный парсинг
                     if (preg_match_all('#<li itemprop="actors"><a href="/name/(\d+)/">(.*?)</a></li>#si',$matches[1],$matches2,PREG_SET_ORDER)) {
                         $new[$index] = array();
@@ -141,7 +133,7 @@ class KinopoiskInfo{
 
         foreach($trailers_parse as $index => $regex){
             if ($index == 'html') {
-                if (preg_match_all($regex, $trailers_page, $matches, PREG_SET_ORDER)) {
+                if (preg_match_all($regex, $trailersPage, $matches, PREG_SET_ORDER)) {
                     foreach ($matches as $match) { // по всем трейлерам (в каждом по нескольку видео в разном качестве)
 
                         if (preg_match('#<tr>[\w\W]*?<a href="[^"]*" class="all">(.*?)</a>\s*<table[\w\W]*?</table>[\w\W]*?<tr>[\w\W]*?<table[\w\W]*?</table>[\w\W]*?<tr>[\w\W]*?<table[\w\W]*?</td>\s*<td>([\w\W]*?)</table>[\w\W]*?<td[\w\W]*?<td>([\w\W]*?)</table>#si', $match[1], $title_sd_hd_matches)) { // название, стандартное качество и HD
@@ -174,7 +166,7 @@ class KinopoiskInfo{
 
                     }
                 }
-            } else if (preg_match_all($regex,$trailers_page,$matches,PREG_SET_ORDER)) {
+            } else if (preg_match_all($regex,$trailersPage,$matches,PREG_SET_ORDER)) {
                 foreach ($matches as $match) {
                     ${$index}[] = $match[1];
                 }
@@ -185,11 +177,10 @@ class KinopoiskInfo{
         $main_trailer_url = array();
         if (isset($trailer_page[0])) {
             $this->snoopy -> fetch('http://www.kinopoisk.ru' . $trailer_page[0]);
-            $main_trailer_page = $this->snoopy -> results;
-            $main_trailer_page = iconv('windows-1251' , 'utf-8', $main_trailer_page);
-            file_put_contents('main_trailer_'.$id.'.html', $main_trailer_page );
+            $mainTrailerPage = $this->snoopy -> results;
+            $mainTrailerPage = iconv('windows-1251' , 'utf-8', $mainTrailerPage);
 
-            if (preg_match_all('#<a href="/getlink\.php[^"]*?link=([^"]*)" class="continue">(.*?)</a>#si',$main_trailer_page,$matches,PREG_SET_ORDER)) {
+            if (preg_match_all('#<a href="/getlink\.php[^"]*?link=([^"]*)" class="continue">(.*?)</a>#si',$mainTrailerPage,$matches,PREG_SET_ORDER)) {
                 foreach ($matches as $match) {
                     $main_trailer_url[] = array('description'=>strip_tags($match[2]),'url'=>$match[1]);
                 }
@@ -204,10 +195,20 @@ class KinopoiskInfo{
             )
         );
 
+        return $json;
+    }
+    
+    /**
+     * @param $id int
+     * @return  string
+     */
+    public function getFilmMetaFromId($id){
 
-        $test = $this->memcached->set(self::MEMECACHED_FILM_PREFIX.$id, $json, 3600);
-        $test2 = $this->memcached->get(self::MEMECACHED_FILM_PREFIX.$id);
-
+        if($content = $this->memcached->get(self::MEMECACHED_FILM_PREFIX.$id)){
+            return $content;
+        }
+        $json = $this->parseFilmFromKinopoiskById($id);
+        $this->memcached->set(self::MEMECACHED_FILM_PREFIX.$id, $json, 3600);
         return $json;
 
     }
