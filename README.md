@@ -1,15 +1,6 @@
 Парсер кинопоиска, который помимо основной информации по фильму, выдаёт ещё и список трейлеров.
 
-
-В базе должна быть таблица cache, в которой должны быть три столбца: id, json и hit.
-Структура таблицы:
-CREATE TABLE IF NOT EXISTS `cache` (
-  `id` int(11) NOT NULL COMMENT 'id фильма на кинопоиске',
-  `json` text NOT NULL COMMENT 'json, который надо послать',
-  `hit` int(11) NOT NULL DEFAULT '0' COMMENT 'сколько раз дёрнули из кеша',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=cp1251 COMMENT='Кеш парсера кинопоиска';
-
+Для локального кеша используется Memcached. parser_kinopoisk.php содержит пример использования
 Формат выдаваемой информации:
 ```JSON
 {
