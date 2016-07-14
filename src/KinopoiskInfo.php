@@ -1,5 +1,7 @@
 <?php
+namespace Eadanilenko\KinopoiskInfo;
 
+use Snoopy\Snoopy;
 class KinopoiskInfo{
 
     /**
@@ -8,7 +10,7 @@ class KinopoiskInfo{
     private $snoopy;
 
     /**
-     * @var Memcached
+     * @var \Memcached
      */
     private $memcached;
 
@@ -18,7 +20,7 @@ class KinopoiskInfo{
 
     const MEMECACHED_FILM_PREFIX = 'kinopoiks_info_film_';
 
-    public function __construct(Memcached $memcached, $kinopoiskLogin=null, $kinopoiskPass=null)
+    public function __construct(\Memcached $memcached, $kinopoiskLogin=null, $kinopoiskPass=null)
     {
         $this->memcached = $memcached;
         $this->snoopy = new Snoopy();
