@@ -57,6 +57,7 @@ class KinopoiskInfo{
      * @param $id
      * @return Movie
      * @throws MovieNotFoundException
+     * @throws KinopoiskAccessException
      */
     private function parseFilmFromKinopoiskById($id){
         if(count($this->auth)>0){
