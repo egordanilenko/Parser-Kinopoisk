@@ -117,8 +117,29 @@ class KinopoiskInfo{
         );
 
 
-        $new=array();
+        $new = array(
+            'name'          => null,
+            'originalname'  => null,
+            'year'          => null,
+            'country_title' => null,
+            'slogan'        => null,
+            'rus_charges'   => null,
+            'world_premiere'=> null,
+            'rus_premiere'  => null,
+            'time'          => null,
+            'imdb'          => null,
+            'kinopoisk'     => null,
+            'poster_url'    => null,
+            'trailer_url'   => null,
+            'director'      => array(),
+            'script'        => array(),
+            'producer'      => array(),
+            'operator'      => array(),
+            'composer'      => array()
 
+        );
+
+        
         foreach($parse as $index => $value){
             if (preg_match($value,$mainPage,$matches)) {
                 if (in_array($index, array('actors_voices','actors_main'))) { // здесь нужен дополнительный парсинг
