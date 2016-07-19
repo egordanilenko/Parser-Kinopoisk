@@ -65,12 +65,10 @@ class KinopoiskInfo{
             $this->snoopy->fetch('http://www.kinopoisk.ru/film/'.$id);
             if($this->snoopy->status > 500 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
         }
-        
-        
 
+        if( (int)$this->snoopy->status == 404 || (int)$this->snoopy->status == 302 ) throw new MovieNotFoundException("Movie with id ".$id." not found");
 
-        if($this->snoopy->status==404) throw new MovieNotFoundException("Movie with id ".$id." not found");
-        if($this->snoopy->status > 500 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
+        if( (int)$this->snoopy->status > 300 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
         
         $movie = new Movie();
         $movie->id = (int)$id;
