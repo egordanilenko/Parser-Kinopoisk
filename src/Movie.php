@@ -129,5 +129,10 @@ class Movie
      * @var array|Trailer[]
      */
     public $trailers = array();
+
+    /**
+     * @var string
+     */
+    public $description;
     
 }

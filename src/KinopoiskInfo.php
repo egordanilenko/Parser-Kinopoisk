@@ -69,7 +69,7 @@ class KinopoiskInfo{
         if( (int)$this->snoopy->status == 404 || (int)$this->snoopy->status == 302 ) throw new MovieNotFoundException("Movie with id ".$id." not found");
 
         if( (int)$this->snoopy->status > 300 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
-        
+
         $movie = new Movie();
         $movie->id = (int)$id;
 
@@ -102,10 +102,10 @@ class KinopoiskInfo{
             'world_premiere'=>'#премьера \(мир\)</td>[^<]*<td[^>]*>.*?<a[^>]*>(.*?)</a>#si',
             'rus_premiere' => '#премьера \(РФ\)</td>[^<]*<td[^>]*>.*?<a[^>]*>(.*?)</a>#si',
             'time' =>         '#id="runtime">(.*?)</td></tr>#si',
-            'description' =>  '#<span class=\"_reachbanner_\"><div class=\"brand_words\"[^>]*>(.*?)</div></span>#si',
             'imdb' =>         '#IMDB:\s(.*?)</div>#si',
             'kinopoisk' =>    '#<div id="block_rating".*?<span class="rating_ball">(.*?)</span>#si',
             'kp_votes' =>     '#<span style=\"font:100 14px tahoma, verdana\">(.*?)</span>#si',
+            'description' =>  '#itemprop="description">(.*?)</div>#si'
         );
 
         $trailers_parse = array(
@@ -129,6 +129,7 @@ class KinopoiskInfo{
             'kinopoisk'     => null,
             'poster_url'    => null,
             'trailer_url'   => null,
+            'description'   => null,
             'director'      => array(),
             'script'        => array(),
             'producer'      => array(),
@@ -137,7 +138,7 @@ class KinopoiskInfo{
 
         );
 
-        
+
         foreach($parse as $index => $value){
             if (preg_match($value,$mainPage,$matches)) {
                 if (in_array($index, array('actors_voices','actors_main'))) { // здесь нужен дополнительный парсинг
@@ -254,6 +255,9 @@ class KinopoiskInfo{
         $movie->rating        = $new['kinopoisk'];
         $movie->posterUrl     = $new['poster_url'];
         $movie->trailerUrl    = $new['trailer_url'];
+        $test = $this->fixBadChars($new['description']);
+        $movie->description   = $test;
+
 
         foreach ($new['actors_main'] as $person){
             array_push($movie->actors,new Person($person['id'], $person['name']));
@@ -301,7 +305,7 @@ class KinopoiskInfo{
 
         return $movie;
     }
-    
+
     /**
      * @param $id int
      * @return  string
@@ -317,6 +321,22 @@ class KinopoiskInfo{
         return $movie;
     }
 
+
+    private function fixBadChars($string){
+
+        $charsMap = array(
+            '&#130;'=>',',//',' baseline single quote
+            '&#131;'=>'',//'NLG' florin
+            '&#132;'=>'"',//'"' baseline double quote
+            '&#133;'=>'...',//'...' ellipsis
+            '&#134;'=>'**', // dagger (a second footnote)
+            '&#135;'=>'***', //double dagger (a third footnote)
+            '&#136;'=>'^', // circumflex accent
+            '&#151;'=>'-',// emdash
+        );
+
+        return str_replace(array_keys($charsMap),array_values($charsMap),$string);
+    }
     private function resultClear( $val, $key = '' ){
         if ( empty( $val ) || $val == '-' ){
             $val = '';
