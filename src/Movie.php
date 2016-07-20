@@ -98,8 +98,7 @@ class Movie
 
     /**
      * @var int
-     * TODO: convert to DateInterval or int
-     *
+     * Duration in minutes
      */
     public $duration;
 

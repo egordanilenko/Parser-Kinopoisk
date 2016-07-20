@@ -249,7 +249,9 @@ class KinopoiskInfo{
         $movie->rusCharges    = $output['rus_charges'];
         $movie->worldPremiere = $output['world_premiere'];
         $movie->rusPremiere   = $output['rus_premiere'];
-        $movie->duration      = $output['time'];
+        if(preg_match('/(\d+) мин./',$output['time'],$matches)){
+            $movie->duration = (int)$matches[1];
+        }
         $movie->imdbRating    = $output['imdb'];
         $movie->rating        = $output['kinopoisk'];
         $movie->posterUrl     = $output['poster_url'];
