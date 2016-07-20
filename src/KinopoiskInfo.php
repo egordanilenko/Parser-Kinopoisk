@@ -82,30 +82,31 @@ class KinopoiskInfo{
         $trailersPage = iconv('windows-1251' , 'utf-8', $trailersPage);
 
         $patterns = array(
-            'name' =>         '#<h1.*?class="moviename-big".*?>(.*?)</h1>#si',
-            'originalname'=>  '#<span itemprop="alternativeHeadline">(.*?)</span>#si',
-            'year' =>         '#год</td>.*?<a[^>]*>(.*?)</a>#si',
-            'country_title' =>'#страна</td>.*?<td[^>]*>(.*?)</td>#si',
-            'slogan' =>       '#слоган</td><td[^>]*>(.*?)</td></tr>#si',
-            'actors_main' =>  '#В главных ролях:</h4>[^<]*<ul>(.*?)</ul>#si',
-            'actors_voices' =>'#Роли дублировали:</h4>[^<]*<ul>(.*?)</ul>#si',
-            'director' =>     '#режиссер</td><td[^>]*>(.*?)</td></tr>#si',
-            'script' =>       '#сценарий</td><td[^>]*>(.*?)</td></tr>#si',
-            'producer' =>     '#продюсер</td><td[^>]*>(.*?)</td></tr>#si',
-            'operator' =>     '#оператор</td><td[^>]*>(.*?)</td></tr>#si',
-            'composer' =>     '#композитор</td><td[^>]*>(.*?)</td></tr>#si',
-            'genre' =>        '#жанр</td><td[^>]*>[^<]*<span[^>]*>(.*?)</span>#si',
-            'budget' =>       '#бюджет</td>.*?<a href="/level/85/film/[0-9]+/" title="">(.*?)</a>#si',
-            'usa_charges' =>  '#сборы в США</td>.*?<a href="/level/85/film/[0-9]+/" title="">(.*?)</a>#si',
-            'world_charges' =>'#сборы в мире</td>.*?<a href="/level/85/film/[0-9]+/" title="">(.*?)</a>#si',
-            'rus_charges' =>  '#сборы в России</td>.*?<div style="position: relative">(.*?)</div>#si',
-            'world_premiere'=>'#премьера \(мир\)</td>[^<]*<td[^>]*>.*?<a[^>]*>(.*?)</a>#si',
-            'rus_premiere' => '#премьера \(РФ\)</td>[^<]*<td[^>]*>.*?<a[^>]*>(.*?)</a>#si',
-            'time' =>         '#id="runtime">(.*?)</td></tr>#si',
-            'imdb' =>         '#IMDB:\s(.*?)</div>#si',
-            'kinopoisk' =>    '#<div id="block_rating".*?<span class="rating_ball">(.*?)</span>#si',
-            'kp_votes' =>     '#<span style=\"font:100 14px tahoma, verdana\">(.*?)</span>#si',
-            'description' =>  '#itemprop="description">(.*?)</div>#si'
+            'name'          => '#<h1.*?class="moviename-big".*?>(.*?)</h1>#si',
+            'originalname'  => '#<span itemprop="alternativeHeadline">(.*?)</span>#si',
+            'year'          => '#год</td>.*?<a[^>]*>(.*?)</a>#si',
+            'country_title' => '#страна</td>.*?<td[^>]*>(.*?)</td>#si',
+            'slogan'        => '#слоган</td><td[^>]*>(.*?)</td></tr>#si',
+            'actors_main'   => '#В главных ролях:</h4>[^<]*<ul>(.*?)</ul>#si',
+            'actors_voices' => '#Роли дублировали:</h4>[^<]*<ul>(.*?)</ul>#si',
+            'director'      => '#режиссер</td><td[^>]*>(.*?)</td></tr>#si',
+            'script'        => '#сценарий</td><td[^>]*>(.*?)</td></tr>#si',
+            'producer'      => '#продюсер</td><td[^>]*>(.*?)</td></tr>#si',
+            'operator'      => '#оператор</td><td[^>]*>(.*?)</td></tr>#si',
+            'composer'      => '#композитор</td><td[^>]*>(.*?)</td></tr>#si',
+            'genre'         => '#жанр</td><td[^>]*>[^<]*<span[^>]*>(.*?)</span>#si',
+            'budget'        => '#бюджет</td>.*?<a href="/level/85/film/[0-9]+/" title="">(.*?)</a>#si',
+            'usa_charges'   => '#сборы в США</td>.*?<a href="/level/85/film/[0-9]+/" title="">(.*?)</a>#si',
+            'world_charges' => '#сборы в мире</td>.*?<a href="/level/85/film/[0-9]+/" title="">(.*?)</a>#si',
+            'rus_charges'   => '#сборы в России</td>.*?<div style="position: relative">(.*?)</div>#si',
+            'world_premiere'=> '#премьера \(мир\)</td>[^<]*<td[^>]*>.*?<a[^>]*>(.*?)</a>#si',
+            'rus_premiere'  => '#премьера \(РФ\)</td>[^<]*<td[^>]*>.*?<a[^>]*>(.*?)</a>#si',
+            'time'          => '#id="runtime">(.*?)</td></tr>#si',
+            'imdb'          => '#IMDB:\s(.*?)</div>#si',
+            'kinopoisk'     => '#<div id="block_rating".*?<span class="rating_ball">(.*?)</span>#si',
+            'kp_votes'      => '#<span style=\"font:100 14px tahoma, verdana\">(.*?)</span>#si',
+            'description'   => '#itemprop="description">(.*?)</div>#si',
+            'age'           => '#ageLimit age(\d+)#si'
         );
 
         $trailersPatterns = array(
@@ -130,6 +131,7 @@ class KinopoiskInfo{
             'poster_url'    => null,
             'trailer_url'   => null,
             'description'   => null,
+            'age'           => null,
             'director'      => array(),
             'script'        => array(),
             'producer'      => array(),
@@ -249,15 +251,16 @@ class KinopoiskInfo{
         $movie->rusCharges    = $output['rus_charges'];
         $movie->worldPremiere = $output['world_premiere'];
         $movie->rusPremiere   = $output['rus_premiere'];
-        if(preg_match('/(\d+) мин./',$output['time'],$matches)){
-            $movie->duration = (int)$matches[1];
-        }
         $movie->imdbRating    = $output['imdb'];
         $movie->rating        = $output['kinopoisk'];
         $movie->posterUrl     = $output['poster_url'];
         $movie->trailerUrl    = $output['trailer_url'];
-        $test = $this->fixBadChars($output['description']);
-        $movie->description   = $test;
+        $movie->description   = $this->fixBadChars($output['description']);
+        $movie->age           = (int)$output['age'];
+
+        if(preg_match('/(\d+) мин./',$output['time'],$matches)){
+            $movie->duration = (int)$matches[1];
+        }
 
 
         foreach ($output['actors_main'] as $person){

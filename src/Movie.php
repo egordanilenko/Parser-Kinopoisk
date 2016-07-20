@@ -32,6 +32,11 @@ class Movie
     public $year;
 
     /**
+     * @var int
+     */
+    public $age;
+
+    /**
      * @var string
      */
     public $countryTitle;
