@@ -62,10 +62,10 @@ class KinopoiskInfo{
     private function parseFilmFromKinopoiskById($id){
         if(count($this->auth)>0){
             $this->snoopy->submit('http://www.kinopoisk.ru/level/30/', $this->auth);
-            $this->snoopy->fetch('http://www.kinopoisk.ru/film/'.$id);
             if($this->snoopy->status > 500 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
         }
 
+        $this->snoopy->fetch('http://www.kinopoisk.ru/film/'.$id);
         if( (int)$this->snoopy->status == 404 || (int)$this->snoopy->status == 302 ) throw new MovieNotFoundException("Movie with id ".$id." not found");
 
         if( (int)$this->snoopy->status > 300 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
@@ -81,7 +81,7 @@ class KinopoiskInfo{
         $trailersPage = $this->snoopy -> results;
         $trailersPage = iconv('windows-1251' , 'utf-8', $trailersPage);
 
-        $parse = array(
+        $patterns = array(
             'name' =>         '#<h1.*?class="moviename-big".*?>(.*?)</h1>#si',
             'originalname'=>  '#<span itemprop="alternativeHeadline">(.*?)</span>#si',
             'year' =>         '#год</td>.*?<a[^>]*>(.*?)</a>#si',
@@ -108,14 +108,14 @@ class KinopoiskInfo{
             'description' =>  '#itemprop="description">(.*?)</div>#si'
         );
 
-        $trailers_parse = array(
+        $trailersPatterns = array(
             'url' =>     '#<a href="/getlink\.php[^"]*?link=([^"]*)" class="continue">(.*?)</a>#si',
             'trailer_page' => '#<a href="([^"]*)" class="all"#si',
             'html'	=> '#<!-- ролик -->([\w\W]*?)<!-- \/ролик -->#si'
         );
 
 
-        $new = array(
+        $output = array(
             'name'          => null,
             'originalname'  => null,
             'year'          => null,
@@ -139,13 +139,13 @@ class KinopoiskInfo{
         );
 
 
-        foreach($parse as $index => $value){
+        foreach($patterns as $index => $value){
             if (preg_match($value,$mainPage,$matches)) {
                 if (in_array($index, array('actors_voices','actors_main'))) { // здесь нужен дополнительный парсинг
                     if (preg_match_all('#<li itemprop="actors"><a href="/name/(\d+)/">(.*?)</a></li>#si',$matches[1],$matches2,PREG_SET_ORDER)) {
-                        $new[$index] = array();
+                        $output[$index] = array();
                         foreach ($matches2 as $match) {
-                            if (strip_tags($match[2]) != '...') $new[$index][] = array('name'=>strip_tags($match[2]),'id'=>$match[1]);
+                            if (strip_tags($match[2]) != '...') $output[$index][] = array('name'=>strip_tags($match[2]),'id'=>$match[1]);
                         }
                     }
                 } else if (in_array($index, array(
@@ -156,34 +156,32 @@ class KinopoiskInfo{
                     'composer',
                 ))) {
                     if (preg_match_all('#<a href="/name/(\d+)/">(.*?)</a>#si',$matches[1],$matches2,PREG_SET_ORDER)) {
-                        $new[$index] = array();
+                        $output[$index] = array();
                         foreach ($matches2 as $match) {
-                            if (strip_tags($match[2]) != '...') $new[$index][] = array('name'=>strip_tags($match[2]),'id'=>$match[1]);
+                            if (strip_tags($match[2]) != '...') $output[$index][] = array('name'=>strip_tags($match[2]),'id'=>$match[1]);
                         }
                     }
                 } else if ($index == 'genre') {
                     if (preg_match_all('#<a href="/lists/.*?/(\d+)/">(.*?)</a>#si',$matches[1],$matches2,PREG_SET_ORDER)) {
-                        $new[$index] = array();
+                        $output[$index] = array();
                         foreach ($matches2 as $match) {
-                            if (strip_tags($match[2]) != '...') $new[$index][] = array('title'=>strip_tags($match[2]),'id'=>$match[1]);
+                            if (strip_tags($match[2]) != '...') $output[$index][] = array('title'=>strip_tags($match[2]),'id'=>$match[1]);
                         }
                     }
-                } else if ($index == 'poster_url') {
-                    $new[ $index ] = 'http://www.kinopoisk.ru' . $matches[1];
                 } else {
-                    $new[ $index ] = preg_replace('#\\n\s*#si', '', html_entity_decode(strip_tags($matches[1]),ENT_COMPAT | ENT_HTML401, 'UTF-8'));
-                    $new[ $index ] = $this->resultClear( $new[ $index ], $index );
+                    $output[ $index ] = preg_replace('#\\n\s*#si', '', html_entity_decode(strip_tags($matches[1]),ENT_COMPAT | ENT_HTML401, 'UTF-8'));
+                    $output[ $index ] = $this->resultClear( $output[ $index ], $index );
                 }
             }
         }
 
-        $new['poster_url'] = 'http://www.kinopoisk.ru/images/film_big/' . $id . '.jpg';
 
-        $url = array();
-        $trailer_page = array();
-        $all_trailers = array();
+        $output['poster_url'] = 'http://www.kinopoisk.ru/images/film_big/' . $id . '.jpg';
 
-        foreach($trailers_parse as $index => $regex){
+        $trailerPage = array();
+        $allTrailers = array();
+
+        foreach($trailersPatterns as $index => $regex){
             if ($index == 'html') {
                 if (preg_match_all($regex, $trailersPage, $matches, PREG_SET_ORDER)) {
                     foreach ($matches as $match) { // по всем трейлерам (в каждом по нескольку видео в разном качестве)
@@ -213,7 +211,7 @@ class KinopoiskInfo{
                                 }
                             }
                             $trailer_family['hd'] = $hd;
-                            $all_trailers[] = $trailer_family;
+                            $allTrailers[] = $trailer_family;
                         }
 
                     }
@@ -227,8 +225,8 @@ class KinopoiskInfo{
 
         // переходим по ссылке на страницу главного трейлера и качаем ссылки на видео оттуда
         $main_trailer_url = array();
-        if (isset($trailer_page[0])) {
-            $this->snoopy -> fetch('http://www.kinopoisk.ru' . $trailer_page[0]);
+        if (isset($trailerPage[0])) {
+            $this->snoopy -> fetch('http://www.kinopoisk.ru' . $trailerPage[0]);
             $mainTrailerPage = $this->snoopy -> results;
             $mainTrailerPage = iconv('windows-1251' , 'utf-8', $mainTrailerPage);
 
@@ -239,56 +237,57 @@ class KinopoiskInfo{
             }
         }
 
-        $new['trailer_url'] = $main_trailer_url[count($main_trailer_url)-1]['url'];
-        $new['trailers'] = $all_trailers;
+        count($main_trailer_url)>0 ? $output['trailer_url'] = $main_trailer_url[count($main_trailer_url)-1]['url'] : null;
+        
+        $output['trailers'] = $allTrailers;
 
-        $movie->name          = $new['name'];
-        $movie->originalName  = $new['originalname'];
-        $movie->year          = (int)$new['year'];
-        $movie->countryTitle  = $new['country_title'];
-        $movie->slogan        = $new['slogan'];
-        $movie->rusCharges    = $new['rus_charges'];
-        $movie->worldPremiere = $new['world_premiere'];
-        $movie->rusPremiere   = $new['rus_premiere'];
-        $movie->duration      = $new['time'];
-        $movie->imdbRating    = $new['imdb'];
-        $movie->rating        = $new['kinopoisk'];
-        $movie->posterUrl     = $new['poster_url'];
-        $movie->trailerUrl    = $new['trailer_url'];
-        $test = $this->fixBadChars($new['description']);
+        $movie->name          = $output['name'];
+        $movie->originalName  = $output['originalname'];
+        $movie->year          = (int)$output['year'];
+        $movie->countryTitle  = $output['country_title'];
+        $movie->slogan        = $output['slogan'];
+        $movie->rusCharges    = $output['rus_charges'];
+        $movie->worldPremiere = $output['world_premiere'];
+        $movie->rusPremiere   = $output['rus_premiere'];
+        $movie->duration      = $output['time'];
+        $movie->imdbRating    = $output['imdb'];
+        $movie->rating        = $output['kinopoisk'];
+        $movie->posterUrl     = $output['poster_url'];
+        $movie->trailerUrl    = $output['trailer_url'];
+        $test = $this->fixBadChars($output['description']);
         $movie->description   = $test;
 
 
-        foreach ($new['actors_main'] as $person){
+        foreach ($output['actors_main'] as $person){
             array_push($movie->actors,new Person($person['id'], $person['name']));
         }
 
-        foreach ($new['director'] as $person){
+        foreach ($output['director'] as $person){
             array_push($movie->director,new Person($person['id'], $person['name']));
 
         }
 
-        foreach ($new['script'] as $person){
+        foreach ($output['script'] as $person){
             array_push($movie->script,new Person($person['id'], $person['name']));
         }
 
-        foreach ($new['producer'] as $person){
+        foreach ($output['producer'] as $person){
             array_push($movie->producer, new Person($person['id'], $person['name']));
         }
 
-        foreach ($new['operator'] as $person){
+        foreach ($output['operator'] as $person){
             array_push($movie->operator,new Person($person['id'], $person['name']));
         }
 
-        foreach ($new['composer'] as $person){
+        foreach ($output['composer'] as $person){
             array_push($movie->composer,new Person($person['id'], $person['name']));
         }
 
-        foreach ($new['genre'] as $genre){
+        foreach ($output['genre'] as $genre){
             array_push($movie->genre, new Genre($genre['id'],$genre['title']));
         }
 
-        foreach ($new['trailers'] as $item) {
+        foreach ($output['trailers'] as $item) {
             $trailer = new Trailer();
             $trailer->title = $item['title'];
 
