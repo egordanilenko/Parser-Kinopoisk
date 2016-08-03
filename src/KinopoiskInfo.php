@@ -61,11 +61,11 @@ class KinopoiskInfo{
      */
     private function parseFilmFromKinopoiskById($id){
         if(count($this->auth)>0){
-            $this->snoopy->submit('http://www.kinopoisk.ru/level/30/', $this->auth);
+            $this->snoopy->submit('https://www.kinopoisk.ru/level/30/', $this->auth);
             if($this->snoopy->status > 500 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
         }
 
-        $this->snoopy->fetch('http://www.kinopoisk.ru/film/'.$id);
+        $this->snoopy->fetch('https://www.kinopoisk.ru/film/'.$id);
         if( (int)$this->snoopy->status == 404 || (int)$this->snoopy->status == 302 ) throw new MovieNotFoundException("Movie with id ".$id." not found");
 
         if( (int)$this->snoopy->status > 300 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
@@ -77,7 +77,7 @@ class KinopoiskInfo{
         $mainPage = iconv('windows-1251' , 'utf-8', $mainPage);
 
         // страница с трейлерами
-        $this->snoopy -> fetch('http://www.kinopoisk.ru/film/' . $id . '/video/type/1/');
+        $this->snoopy -> fetch('https://www.kinopoisk.ru/film/' . $id . '/video/type/1/');
         $trailersPage = $this->snoopy -> results;
         $trailersPage = iconv('windows-1251' , 'utf-8', $trailersPage);
 
@@ -178,7 +178,7 @@ class KinopoiskInfo{
         }
 
 
-        $output['poster_url'] = 'http://www.kinopoisk.ru/images/film_big/' . $id . '.jpg';
+        $output['poster_url'] = 'https://www.kinopoisk.ru/images/film_big/' . $id . '.jpg';
 
         $trailerPage = array();
         $allTrailers = array();
@@ -228,7 +228,7 @@ class KinopoiskInfo{
         // переходим по ссылке на страницу главного трейлера и качаем ссылки на видео оттуда
         $main_trailer_url = array();
         if (isset($trailerPage[0])) {
-            $this->snoopy -> fetch('http://www.kinopoisk.ru' . $trailerPage[0]);
+            $this->snoopy -> fetch('https://www.kinopoisk.ru' . $trailerPage[0]);
             $mainTrailerPage = $this->snoopy -> results;
             $mainTrailerPage = iconv('windows-1251' , 'utf-8', $mainTrailerPage);
 
