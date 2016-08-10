@@ -8,7 +8,7 @@ $memcached = new \Memcached();
 $memcached->addServer('127.0.0.1',11211);
 try{
     $kinopoisk = new KinopoiskInfo($memcached,1,'dimmduh','gfhjkm03');
-
+//    echo json_encode($kinopoisk->getTopMovies());
     echo json_encode($kinopoisk->getMovieFromId($id));
 
 }catch (\Eadanilenko\KinopoiskInfo\MovieNotFoundException $e){

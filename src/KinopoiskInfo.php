@@ -53,6 +53,43 @@ class KinopoiskInfo{
         $this->snoopy->agent = self::CLIENT_AGENT;
     }
 
+    private function connect(){
+        if(count($this->auth)>0){
+            $this->snoopy->submit('https://www.kinopoisk.ru/level/30/', $this->auth);
+            if($this->snoopy->status > 500 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
+        }
+    }
+
+    /**
+     * Get top collection
+     * @param int $count
+     * @return array
+     */
+    public function getTopMovies($count=null){
+        $top = array();
+        $this->connect();
+        $this->fetch('https://www.kinopoisk.ru/top/');
+        preg_match_all('/film\/(\d+)\/" class="all"/',$this->snoopy->results,$films);
+        $films = $films[1];
+
+        $k = 0;
+        foreach ($films as $film){
+             array_push($top, $this->getMovieFromId((int)$film));
+            if($count) $k++;
+            if($count && $count==$k) return $top;
+        }
+
+        return $top;
+
+    }
+
+    private function fetch($url){
+        $this->snoopy->fetch($url);
+        if( (int)$this->snoopy->status == 404 || (int)$this->snoopy->status == 302 ) throw new MovieNotFoundException("Movie with id ".$id." not found");
+        if( (int)$this->snoopy->status > 300 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
+
+    }
+
     /**
      * @param $id
      * @return Movie
@@ -60,15 +97,8 @@ class KinopoiskInfo{
      * @throws KinopoiskAccessException
      */
     private function parseFilmFromKinopoiskById($id){
-        if(count($this->auth)>0){
-            $this->snoopy->submit('https://www.kinopoisk.ru/level/30/', $this->auth);
-            if($this->snoopy->status > 500 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
-        }
-
-        $this->snoopy->fetch('https://www.kinopoisk.ru/film/'.$id);
-        if( (int)$this->snoopy->status == 404 || (int)$this->snoopy->status == 302 ) throw new MovieNotFoundException("Movie with id ".$id." not found");
-
-        if( (int)$this->snoopy->status > 300 ) throw new KinopoiskAccessException($this->snoopy->response_code,$this->snoopy->status);
+        $this->connect();
+        $this->fetch('https://www.kinopoisk.ru/film/'.$id);
 
         $movie = new Movie();
         $movie->id = (int)$id;
