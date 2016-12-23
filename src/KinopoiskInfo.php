@@ -66,15 +66,11 @@ class KinopoiskInfo{
      * @return array
      */
     public function getTopMovies($count=null){
-        $top = array();
-        $this->connect();
-        $this->fetch('https://www.kinopoisk.ru/top/');
-        preg_match_all('/film\/(\d+)\/" class="all"/',$this->snoopy->results,$films);
-        $films = $films[1];
-
+        $films = $this->getTopMoviesId($count);
+        $top=array();
         $k = 0;
         foreach ($films as $film){
-             array_push($top, $this->getMovieFromId((int)$film));
+            array_push($top, $this->getMovieFromId((int)$film));
             if($count) $k++;
             if($count && $count==$k) return $top;
         }
@@ -82,6 +78,21 @@ class KinopoiskInfo{
         return $top;
 
     }
+
+    /**
+     * Get top collection
+     * @param int $count
+     * @return array
+     */
+    public function getTopMoviesId($count=null){
+        if(!$count) $count=20;
+        $this->connect();
+        $this->fetch('https://www.kinopoisk.ru/top/');
+        preg_match_all('/film\/(\d+)\/" class="all"/',$this->snoopy->results,$films);
+        return $films[1];
+
+    }
+
 
     private function fetch($url){
         $this->snoopy->fetch($url);
@@ -97,6 +108,8 @@ class KinopoiskInfo{
      * @throws KinopoiskAccessException
      */
     private function parseFilmFromKinopoiskById($id){
+        $this->snoopy = new Snoopy();
+        $this->snoopy->maxredirs = 2;
         $this->connect();
         $this->fetch('https://www.kinopoisk.ru/film/'.$id);
 
@@ -270,7 +283,7 @@ class KinopoiskInfo{
         }
 
         count($main_trailer_url)>0 ? $output['trailer_url'] = $main_trailer_url[count($main_trailer_url)-1]['url'] : null;
-        
+
         $output['trailers'] = $allTrailers;
 
         $movie->name          = $output['name'];
@@ -342,7 +355,7 @@ class KinopoiskInfo{
 
     /**
      * @param $id int
-     * @return  string
+     * @return  Movie
      */
     public function getMovieFromId($id){
 
