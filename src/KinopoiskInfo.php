@@ -102,6 +102,13 @@ class KinopoiskInfo{
     }
 
     /**
+     * @param $string
+     * @return string
+     */
+    private function w1251ToUtf8($string){
+        return mb_convert_encoding($string, "utf-8", "windows-1251");
+    }
+    /**
      * @param $id
      * @return Movie
      * @throws MovieNotFoundException
@@ -117,12 +124,11 @@ class KinopoiskInfo{
         $movie->id = (int)$id;
 
         $mainPage = $this->snoopy -> results;
-        $mainPage = iconv('windows-1251' , 'utf-8', $mainPage);
-
+        $mainPage = $this->w1251ToUtf8($mainPage);
         // страница с трейлерами
         $this->snoopy -> fetch('https://www.kinopoisk.ru/film/' . $id . '/video/type/1/');
         $trailersPage = $this->snoopy -> results;
-        $trailersPage = iconv('windows-1251' , 'utf-8', $trailersPage);
+        $trailersPage = $this->w1251ToUtf8($trailersPage);
 
         $patterns = array(
             'name'          => '#<h1.*?class="moviename-big".*?>(.*?)</h1>#si',
@@ -273,7 +279,7 @@ class KinopoiskInfo{
         if (isset($trailerPage[0])) {
             $this->snoopy -> fetch('https://www.kinopoisk.ru' . $trailerPage[0]);
             $mainTrailerPage = $this->snoopy -> results;
-            $mainTrailerPage = iconv('windows-1251' , 'utf-8', $mainTrailerPage);
+            $mainTrailerPage = $this->w1251ToUtf8($mainTrailerPage);
 
             if (preg_match_all('#<a href="/getlink\.php[^"]*?link=([^"]*)" class="continue">(.*?)</a>#si',$mainTrailerPage,$matches,PREG_SET_ORDER)) {
                 foreach ($matches as $match) {
